@@ -1,0 +1,1 @@
+C:\mch_py_38\Scripts\jupyter-notebook
