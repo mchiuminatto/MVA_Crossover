@@ -1,1 +1,1 @@
-C:\mch_py_38\Scripts\jupyter-notebook
+C:\mch_py_310\Scripts\jupyter lab
