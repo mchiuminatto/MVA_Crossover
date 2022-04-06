@@ -1,2 +1,2 @@
 # MVA_Crossover
- Strategy Back-testing demo
+In the context of FOREX trading, in the commitment of finding profitable trading strategies, you will find in books, articles, papers, web sites and maybe from your own inspiration, strategies that shows positive profits, being a measure of this the cumulative profit over a period of time. Well, that is not enough unfortunately, because does not necessarily indicates consistency in the profits.
