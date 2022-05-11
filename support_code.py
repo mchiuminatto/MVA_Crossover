@@ -1,7 +1,14 @@
 import pandas as pd
-import scipy
 import numpy as np
+from scipy.stats import norm
+import scipy
+import talib as ta
+import sys
 import matplotlib.pyplot as plt
+import seaborn as sns
+import seaborn as sns, numpy as np
+sns.set_theme(style="whitegrid")
+import mplfinance as mpf
 
 class BlockBootStrapSamp:
 
@@ -15,7 +22,7 @@ class BlockBootStrapSamp:
         self.dec_places = dec_places
 
         self.mean_sampling: pd.Series = None
-        self.sampling_mean: float = None
+        self.samplinpipg_mean: float = None
         self.sampling_median: float = None
         self.sampling_std: float = None
         self.sampling_std_error: float = None
@@ -43,7 +50,7 @@ class BlockBootStrapSamp:
         self.mean_sampling.dropna(inplace=True)
         # print("Samples ", len(self.mean_sampling))
         if total_samples != len(self.mean_sampling):
-            raise Exception("Expected number of samples differs from actual number of samples")
+            raise Warning("Expected number of samples differs from actual number of samples")
         
         # stats calculations
         self.sampling_mean = self.mean_sampling.mean().round(self.dec_places)
@@ -98,4 +105,3 @@ class PlotDistribution:
         plt.show()
 
 
-    
