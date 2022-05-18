@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import norm
 import scipy
-import talib as ta
+# import talib as ta
 import sys
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -103,5 +103,7 @@ class PlotDistribution:
         plt.legend(fontsize=8)
         plt.title('Profit distribution', size=15)
         plt.show()
+
+
 
 
