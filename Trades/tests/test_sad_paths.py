@@ -4,9 +4,17 @@ from Trades.tests import TestPrep
 import numpy as np
 import pytest
 
+
+def test_pip_position_not_specified():
+    
+    with pytest.raises(TypeError) as exp:
+        _trades = MarkDiscontinuous()
+        assert exp.value  =="Missing pip decimal position"
+
+
 def test_shape_mismatch():
 
-    _trades = MarkDiscontinuous()
+    _trades = MarkDiscontinuous(4)
     _context = TestPrep.TestPrep.data_prep()
     _df = _context["data"]
     _sig = _context["signal"]

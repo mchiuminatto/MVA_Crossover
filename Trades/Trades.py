@@ -1,38 +1,75 @@
 import pandas as pd
 import numpy as np
 
+
 class MarkDiscontinuous:
 
-    def __init__(self, entry_exit_prd_col="en_ex_prd", 
-                trade_col="trade", 
-                trade_id_col="trade_id"):
+    def __init__(self, 
+                pip_decinmal_position: int,
+                entry_exit_period_col: str="en_ex_prd", 
+                trade_col_name: str="trade", 
+                trade_id_col_name: str="trade_id"):
 
-        self.en_ex_prd_col = entry_exit_prd_col
-        self.trade_col = trade_col
-        self.trade_id_col = trade_id_col
+        if pip_decinmal_position is None:
+            raise TypeError("Missing pip decimal position")
 
-    def compute(self, df: pd.DataFrame, signal: pd.Series) -> pd.DataFrame:
+        self.pip_factor = 10**pip_decinmal_position
+        self.entry_exit_period_col_name = entry_exit_period_col
+        self.trade_col_name = trade_col_name
+        self.trade_id_col_name = trade_id_col_name
+        
+
+    def mark_trades(self, df: pd.DataFrame, signal: pd.Series) -> pd.DataFrame:
+        """
+        Mark each trading period
+        """
 
         # validations
         if df.shape[0] != signal.shape[0]:
             raise ValueError("Either the data set and signal vectors needs to be the same shape")
 
         # mark entry and exit bars
-        df[self.en_ex_prd_col] = signal.shift(1)
+        df[self.entry_exit_period_col_name] = signal.shift(1)
        
         # mark trades
-        df[self.trade_col] = df[self.en_ex_prd_col]
-        df[self.trade_col].ffill(inplace=True)
-        df[self.trade_col] =  df[self.trade_col].replace(-1, np.nan)
+        df[self.trade_col_name] = df[self.entry_exit_period_col_name]
+        df[self.trade_col_name].ffill(inplace=True)
+        df[self.trade_col_name] =  df[self.trade_col_name].replace(-1, np.nan)
 
         # generate trades id
+        _mask_trade_start = (df[self.trade_col_name] == 1 ) & (df[self.trade_col_name].shift(1).isna())
 
-        # marks trade start
-        mask_trade_start = (df[self.trade_col] == 1 ) & (df[self.trade_col].shift(1).isna())
-        df.loc[mask_trade_start, self.trade_id_col] = range(1, len(df[mask_trade_start])+1)     
-        df[self.trade_id_col].ffill(inplace=True)
-        df.loc[df[self.trade_col].isna(), self.trade_id_col] = np.nan
+         # marks trade start
+        df.loc[_mask_trade_start, self.trade_id_col_name] = range(1, len(df[_mask_trade_start]) + 1)     
+        df[self.trade_id_col_name].ffill(inplace=True)
+        df.loc[df[self.trade_col_name].isna(), self.trade_id_col_name] = np.nan
 
         return df
 
+    def reduce_trades(self, df: pd.DataFrame):
+        """
+        Reduce trading periods to one record per trade
+        """
+        df['date'] = df.index
+        _mask_trade = df[self.trade_id_col_name] > 0
+        df.loc[_mask_trade, 'gross_profit'] = (df.loc[_mask_trade, 'Close'] - df.loc[_mask_trade, 'Open'] ) * self.pip_factor
 
+        # reduction (aggregation) using groupby
+        _df_trades_pft = df[[self.trade_id_col_name, 'gross_profit']].groupby(by=self.trade_id_col_name).sum()
+        _df_trades_date = df[[self.trade_id_col_name, 'date']].groupby(by=self.trade_id_col_name).min()
+        _df_trades_date_end = df[[self.trade_id_col_name, 'date']].groupby(by=self.trade_id_col_name).max()
+
+        _df_trades = pd.merge(_df_trades_pft, _df_trades_date, how='inner', left_index=True, right_index=True)
+        _df_trades = _df_trades.merge(_df_trades_date_end, how='inner', left_index=True, right_index=True, suffixes=["_open", "_close"])
+
+        return _df_trades
+
+    def compute(self, df: pd.DataFrame, signal: pd.Series) -> pd.DataFrame:
+        # validations
+        if df.shape[0] != signal.shape[0]:
+            raise ValueError("Either the data set and signal vectors needs to be the same shape")
+
+        df = self.mark_trades(df, signal)
+        _df_trades = self.reduce_trades(df)
+
+        return _df_trades

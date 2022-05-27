@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+import logging
 
 # region constants
 DATA_SET = "EURUSD_Hourly_Bid_2021.csv"
@@ -30,6 +31,7 @@ def data_prep() -> dict:
     dict: dictionary with the three data sets: "data", "signal", "trades"
 
     """
+    logging.info(">>>>> Data preparation ")
     _df = pd.read_csv(f"./data/{DATA_SET}")
     _df['Time (UTC)'] = pd.to_datetime(_df['Time (UTC)']) 
     _df.set_index('Time (UTC)', inplace=True)
@@ -49,7 +51,7 @@ def data_prep() -> dict:
     # _trd.sort_index(inplace=True)
 
     # pack datasets
-    _data_sets = {"data":_df, "signal": _sig, "trades":_trd}
+    _data_sets = {"data":_df, "signal": _sig, "trades":_trd, "DIGITS":DIGITS}
 
     return _data_sets
 
