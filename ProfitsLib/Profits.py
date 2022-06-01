@@ -378,7 +378,7 @@ class Profits:
         df[self.cum_pft_col] = df[self.net_pft_col].cumsum().astype(float)
 
 
-    def calc_metrics(self, df,  **params):
+    def calc_metrics(self, df):
         """
         Calculates a set of  metrics:
 
@@ -394,10 +394,6 @@ class Profits:
         Cumulative profit standard deviation
         Expected (mean) profit
 
-        Financial set
-
-        Maximum draw down
-
         :param df:
         :return:
         """
@@ -412,24 +408,11 @@ class Profits:
         self.metrics["total_loss"] = df[~_mask_win][self.net_pft_col].sum()
         self.metrics["stdev_pl"] = df[self.net_pft_col].std(0)
         self.metrics["stdev_cum_pl"] = df[self.cum_pft_col].std(0)
-        self.metrics["avg_pl"] =  df[self.net_pft_col].mean()
-
-        # financial set
-
-        _dd = DrawDown()
-        _dd.compute(df[self.net_pft_col], params["init_capital"], plot=params["plot_dd"])
-        self.metrics["max_dd"] = _dd.results["dd"]
-
-        _sharpe = Sharpe()
-        _df_pft = df[["open_time", self.net_pft_col]].copy()
-        _df_pft["open_time"] = pd.to_datetime(df["open_time"])
-        _df_pft.set_index(_df_pft["open_time"], inplace=True)
-        _sharpe.compute(_df_pft[self.net_pft_col], params["risk_free_ann"], params["sharpe_period"])
-        self.metrics["sharpe_ratio"] = _sharpe.results["sharpe_ratio"]
+        self.metrics["avg_profit"] =  df[self.net_pft_col].mean()
+        self.metrics["median_profit"] =  df[self.net_pft_col].median()
 
 
     def compute(self, df, cost):
 
         self.calc_net_profit(df, cost)
-
-    
+        self.calc_metrics(df)
