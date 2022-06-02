@@ -3,12 +3,11 @@
 Author: Marcello Chiuminatto <br>
 Python version: 3.10.4
 
-
 ## Overview
 
 In the context of FOREX trading, in the commitment for finding profitable trading strategies, you will find in books, articles, papers, web sites and maybe from your own inspiration, strategies that shows positive profits, based on cumulative profit over a period. Well, that is not enough unfortunately, because does not necessarily indicate consistency in the profits.
 
-Would be profit average (expected profit) then be a good indicator of profits consistency? The answer is not straight forward: not necessarily. Why? and the answer to this question is the topic of this publication: Outliers. 
+Would be profit average (expected profit) then be a good indicator of profits consistency? The answer is not straight forward: not necessarily. Why? and the answer to this question is the topic of this analysis: Outliers. 
 
 Outliers will distort the reading of cumulative profits and expected profits in such a way that a losing strategy, can look like a profitable one.
 
@@ -31,7 +30,7 @@ Let's define a strategy S, from which we get a sample of 50 trades whose profits
 
 Total profit and average profit are positive, but clearly this is strongly influenced by the 200 pip trade. Pay close attention to median though, is telling something about this case.
 
-Based on a real but simple trading strategy, it will be shown how outliers impacts mean and total profits, however median signals that something is hiding behind the scenes.
+Based on a real but simple trading strategy, it will be shown how outliers impacts mean and total profits, however median signals that something is hidden behind the scenes.
 
 Throughout this article, it will be shown with a real, but simple trading strategy, the danger of not paying attention to outliers and in the process of showing so, it is presented the trading strategy research life cycle: design / back-testing, analysis, and conclusions.
 
@@ -96,12 +95,12 @@ Now it is time to concretely define the strategy Entry/Exit/Management rules.
   2. $SMA_s < SMA_m < SMA_f$
  
   **Exit**<br><br> 
-  Exit a long position when $SMA_f$ cross below $SMA_m$
+  Exit a long position when $close_i$ cross below $SMA_m$
 
   Mathematically
 
   Exit when
-  1. $SMA_f < SMA_m$
+  1. $close_i < SMA_m < close_{i-1}$
    
 <img src="./long_setup_example.png">
 
@@ -116,7 +115,7 @@ In this section are presented some steps to implement a simple *vectorized* back
 
 ### Data
 
-This study is based on FOREX data for the instrument EURUSD, format OHLC (Open/High/Low/Close) aggregated at a fix frequency of one hour (H1) in the period from 2015-01-01 22:00:00 until 2021-11-24 23:00:00
+The data for this study is for the instrument (currency cross pair) EURUSD, format OHLC (Open/High/Low/Close) aggregated at a fix frequency of one hour (H1) in the period from 2015-01-01 22:00:00 until 2021-11-24 23:00:00
 
 Sample:
 
@@ -130,5 +129,118 @@ Sample:
 
 
 
-![image](https://user-images.githubusercontent.com/9592242/171404656-c2cbc79a-c480-4770-8022-1088b2a3f626.png)
+<img src="price.png">
+
+### Feature Calculation
+Besides price, the three moving averages need to be calculated: $SMA_f$ (fast), $SMA_m$ (medium) and $SMA_s$ (slow).
+
+The image belo shows the three SMA plotting.
+
+<img src="features.png">
+
+### Strategy Vectorization
+
+For this strategy, the required steps for vectorization are the following:
+
+* Mark entry and exit signal
+* Mark trading periods
+* Reduce trading periods to trades
+* Calculate profits
+
+These steps that are followed here are not mandatory and can and probably will change from strategy to strategy, from trader to trader and for many other reasons.
+
+Worth to mention that key tools for vectorization are python libraries: Numpy and Pandas.
+
+####  Marking Entry and Exit Signal
+
+A signal is a flag a light or anything indicating that some condition has been reached and someone or something must execute an action accordingly.
+
+In the case of this strategy and depending on the required action that needs to be triggered, there are two kind of signals: entry signal, triggering a buy action to open a position, and exit signal, triggering a sell action to close a position.
+
+In the context of this strategy also, the signals are calculated and risen once a period is closed, when period's close price is available and therefore it is possible to calculate all moving averages based on it. This is not the only approach though, some strategies could trigger signals based on tick data arriving each second for example, when a period is not yet closed.
+
+Remember that this is a buy only (long) strategy, so the signal space is limited. Broader strategies could have wider signal spaces, containing for example entry, adjust, increase size, decrease size, close signals, to name a few.
+
+
+<b>Entry Signal: Cross over condition</b>
+
+The entry signal is risen when the last available close price crosses above the fast SMA, along with fast SMA being above med SMA and med SMA being above the slow SMA.
+
+$signal_i = (open_{i} < SMA_{fast, i} < close_{i})  \land (SMA_{slow, i} < SMA_{med, i} < SMA_{fast, i})$
+
+Where:
+
+* $Close_{i}$: Last closed bar close price.
+* $Open_{i}$: Last closed bar open price.
+* $SMA_{fast, i}, SMA_{med, i}, SMA_{slow, i}$: SMA fast, med and slow respectively, calculated at the last bar close.
+
+
+<b>Entry period</b>
+
+The entry period is marked right at the opening of current bar, if signal was risen for the last closed bar.
+
+
+$entry_i=\begin{cases}
+    1 \text{ if }signal_{i-1} = True\\
+    \emptyset \text{ otherwise}
+\end{cases}
+$
+
+Where:
+
+* $entry_i$: Indicates if a trade needs to be opened at current period.
+* $signal_{i-1}:$ Signal at last closed bar.
+
+
+<b>Exit Signal</b>
+
+The exit signal is risen when the close price crosses below the med SMA, therefore, following the entry.
+
+<b>Exit Signal</b>
+
+$x\_signal_i = close_{i} < SMA_{med, i} < close_{i-1}$
+
+<b>Exit Signal</b>
+
+$exit_i = \begin{cases}
+    -1 \text{ if }x\_signal_{i-1} = True \\
+    \emptyset \text{ otherwise}
+\end{cases}
+$
+
+In the example below:
+
+
+| t | Entry/Exit Signal | Entry/Exit Period | Trade |
+| - | ----------------- | ----------------- | ----- |
+| 1 |                   |                   |       |
+| 2 | 1                 |                   |       |
+| 3 |                   | 1                 | 1     |
+| 4 |                   |                   | 1     |
+| 5 |                   |                   | 1     |
+| 6 | \-1               |                   | 1     |
+| 7 |                   | \-1               |       |
+| 8 |                   |                   |       |
+
+
+- $t=2$: entry signal risen at the close of 2nd bar.
+- $t=3$: entry condition is met, so a long trade is open right at the opening of the 3rd bar.
+- $t=6$: exit signal is risen at the close of 6th bar.
+- $t=7$: exit condition is met, so the trade is closed right at the opening of the 7th bar.
+
+The following image shows entry/exit period example
+
+<img src="entry_exit.png">
+
+
+The following image shows trading periods marking.
+
+<img src="trade_marks.png">
+
+
+#### Trade Reduction
+
+This process is also part of the strategy vectorization and consists of transforming from period-wise trade markings to trade-wise records. A trade record is composed of: opening and closing date and time, opening and closing price, gross profit. Trades are the required input for profits calculations and metrics.
+
+<img src="reduction.png" width="600">
 
