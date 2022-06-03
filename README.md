@@ -240,7 +240,87 @@ The following image shows trading periods marking.
 
 #### Trade Reduction
 
-This process is also part of the strategy vectorization and consists of transforming from period-wise trade markings to trade-wise records. A trade record is composed of: opening and closing date and time, opening and closing price, gross profit. Trades are the required input for profits calculations and metrics.
+This process is also part of the strategy vectorization and consists of transforming from period-wise trade markings to trade-wise records. The attributes that define a trade could be open date/time, close date/time, open price, close price, number of trading periods, to name a few. What attributes to include is a decision that depends on the problem's context. In this case open date/time, close date/time and gross profit are enough.
 
 <img src="reduction.png" width="600">
+
+| trade\_id | gross\_profit | date\_open      | date\_close     |
+| --------- | ------------- | --------------- | --------------- |
+| 1         | \-40.1        | 1/12/2015 4:00  | 1/12/2015 8:00  |
+| 2         | \-38.7        | 1/22/2015 9:00  | 1/22/2015 13:00 |
+| 3         | \-47.1        | 1/30/2015 11:00 | 1/30/2015 12:00 |
+| 4         | \-18.3        | 2/3/2015 1:00   | 2/3/2015 3:00   |
+| 5         | 94            | 2/3/2015 11:00  | 2/4/2015 9:00   |
+| ...       | ...           | ...             | ...             |
+| 620       | \-34.3        | 10/29/2021 1:00 | 10/29/2021 8:00 |
+| 621       | \-14.7        | 11/2/2021 11:00 | 11/2/2021 13:00 |
+| 622       | 13.4          | 11/8/2021 11:00 | 11/9/2021 11:00 |
+| 623       | \-10.9        | 11/9/2021 14:00 | 11/9/2021 15:00 |
+| 624       | \-8.7         | 11/10/2021 0:00 | 11/10/2021 2:00 |
+
+
+### Profit Calculations
+
+With trades in place, now it is possible to perform profits calculations along with some profits related metrics.
+
+In the cntext of this study, one profit related claculatoin is required: net profit, which is the result of substracting trade cost from gross profit:
+
+$NP = GP - Cost$
+
+Where
+
+$NP$: Net Profit<br>
+$GP$: Gross Profit<br>
+$Cost$: Trading Cost<br>
+
+**Trading Cost**
+
+Many times overlooked, Trading Cost is a critical variable that can make the difference between a profitable strategy and a losing one. Maybe you have read books, papers or publications that shows very profitable strategies not mentioning trading cost though. Most probably is they didn't consider it, because if they did, the strategy wouldn’t be as profitable as they presented it.
+
+The details on trading cost calculation os out of the scope of this study and deserves an analysis by itself, enough is to say that its calculation is a function of: Spread, Commission. The value presented here also include slippage. The used in this analysis is 0.5 pips per trade
+
+*"Slippage refers to the difference between the expected price of a trade and the price at which the trade is executed."*
+
+Source: https://www.investopedia.com/terms/s/slippage.asp
+
+The following image presents the gross and net profit for the strategy under analysis.
+
+<img src="gp_np.png">
+
+| trade\_id | gross\_profit | date\_open      | date\_close     | net\_profit | cum\_profit |
+| --------- | ------------- | --------------- | --------------- | ----------- | ----------- |
+| 1         | \-40.1        | 1/12/2015 4:00  | 1/12/2015 8:00  | \-40.6      | \-40.6      |
+| 2         | \-38.7        | 1/22/2015 9:00  | 1/22/2015 13:00 | \-39.2      | \-79.8      |
+| 3         | \-47.1        | 1/30/2015 11:00 | 1/30/2015 12:00 | \-47.6      | \-127.4     |
+| 4         | \-18.3        | 2/3/2015 1:00   | 2/3/2015 3:00   | \-18.8      | \-146.2     |
+| 5         | 94            | 2/3/2015 11:00  | 2/4/2015 9:00   | 93.5        | \-52.7      |
+
+
+
+#### Profit Metrics
+
+|Metric|Value|
+|------|-----|
+total_trades 	  | 624
+winning_trades 	  | 184
+losing_trades 	  | 440
+total_pl 	      | 857.3
+total_profit 	  | 8486.3
+total_loss 	      | -7629.0
+stdev_pl 	      | 43.93
+stdev_cum_pl 	  | 372.23
+avg_profit 	      | 1.37
+median_profit 	  | -8.25
+
+<img src="raw_profit_dist.png">
+
+**Observations**
+
+Even though the strategy is profitable for the time range back-tested, it is not consistent.
+
+Mainly relies on outliers, which pull the mean (expected profit) to the positive side, but the median (less sensitive to outliers) is negative, showing that the bulk of the trades are in the negative side. A good strategy would have both statistics in the positive side.
+
+All this is confirmed by skewness which is positive indicating a right tailed distribution, which is not good considering median below zero.
+
+What if outliers are removed? The hypothesis is that this strategy relies only on outliers and removing them would turn this strategy into a losing one in average, meaning that the average profit should shift to the negative side.
 
