@@ -52,6 +52,9 @@ def test_calc_metrics(prepare_context):
     _exp_stdev_cum_pl = _df["acc_profit_pips"].std().round(2)
     _exp_avg_pl = _df["net_profit"].mean().round(2)
     _exp_median_pft = _df["net_profit"].median().round(2)
+    _exp_skew = _df["net_profit"].skew().round(2)
+    _exp_win_avg = _df[(_df["net_profit"] > 0)]["net_profit"].mean().round(2)
+    _exp_los_avg = _df[(_df["net_profit"] <= 0)]["net_profit"].mean().round(2)
   
     assert _exp_total_trades == _pft.metrics["total_trades"]
     assert _exp_winning_trades == _pft.metrics["winning_trades"]
@@ -63,6 +66,10 @@ def test_calc_metrics(prepare_context):
     assert _exp_stdev_cum_pl == round(_pft.metrics["stdev_cum_pl"], 2)
     assert _exp_avg_pl == round(_pft.metrics["avg_profit"], 2)
     assert _exp_median_pft == round(_pft.metrics["median_profit"], 2)
+    assert _exp_skew == round(_pft.metrics["skew_pl"], 2)
+    assert _exp_win_avg == round(_pft.metrics["avg_winning"], 2)
+    assert _exp_los_avg == round(_pft.metrics["avg_losing"], 2)
+
 
 
 def test_compute(prepare_context):
@@ -84,6 +91,9 @@ def test_compute(prepare_context):
     _exp_stdev_cum_pl = _df["acc_profit_pips"].std().round(2)
     _exp_avg_pl = _df["net_profit"].mean().round(2)
     _exp_median_pft = _df["net_profit"].median().round(2)
+    _exp_skew = _df["net_profit"].skew().round(2)
+    _exp_win_avg = _df[(_df["net_profit"] > 0)]["net_profit"].mean().round(2)
+    _exp_los_avg = _df[(_df["net_profit"] <= 0)]["net_profit"].mean().round(2)
   
     assert _exp_total_trades == _pft.metrics["total_trades"]
     assert _exp_winning_trades == _pft.metrics["winning_trades"]
@@ -95,5 +105,9 @@ def test_compute(prepare_context):
     assert _exp_stdev_cum_pl == round(_pft.metrics["stdev_cum_pl"], 2)
     assert _exp_avg_pl == round(_pft.metrics["avg_profit"], 2)
     assert _exp_median_pft == round(_pft.metrics["median_profit"], 2)
+    assert _exp_skew == round(_pft.metrics["skew_pl"], 2)
+    assert _exp_win_avg == round(_pft.metrics["avg_winning"], 2)
+    assert _exp_los_avg == round(_pft.metrics["avg_losing"], 2)
+
 
 

@@ -263,7 +263,7 @@ This process is also part of the strategy vectorization and consists of transfor
 
 With trades in place, now it is possible to perform profits calculations along with some profits related metrics.
 
-In the cntext of this study, one profit related claculatoin is required: net profit, which is the result of substracting trade cost from gross profit:
+In the context of this study, one profit related calculation is required: net profit, which is the result of subtracting trade cost from gross profit:
 
 $NP = GP - Cost$
 
@@ -275,13 +275,9 @@ $Cost$: Trading Cost<br>
 
 **Trading Cost**
 
-Many times overlooked, Trading Cost is a critical variable that can make the difference between a profitable strategy and a losing one. Maybe you have read books, papers or publications that shows very profitable strategies not mentioning trading cost though. Most probably is they didn't consider it, because if they did, the strategy wouldn’t be as profitable as they presented it.
+Usually overlooked, Trading Cost is a critical variable that can make the difference between a profitable strategy and a losing one. Maybe you have read books, papers or publications that shows very profitable strategies not mentioning trading cost though. Most probably is they didn't consider it, because if they did, the strategy wouldn’t be as profitable as they presented it.
 
-The details on trading cost calculation os out of the scope of this study and deserves an analysis by itself, enough is to say that its calculation is a function of: Spread, Commission. The value presented here also include slippage. The used in this analysis is 0.5 pips per trade
-
-*"Slippage refers to the difference between the expected price of a trade and the price at which the trade is executed."*
-
-Source: https://www.investopedia.com/terms/s/slippage.asp
+More detail on trading cost calculation is out of the scope of this study and deserve an analysis by itself, enough is to say that its calculation is a function of spread and commission. The value used in this analysis is 0.5 pips per trade
 
 The following image presents the gross and net profit for the strategy under analysis.
 
@@ -316,11 +312,10 @@ median_profit 	  | -8.25
 
 **Observations**
 
-Even though the strategy is profitable for the time range back-tested, it is not consistent.
+Winning trades proportion: 184 out of 624 trades are winning ones. A 29.5%, or roughly a third.
 
-Mainly relies on outliers, which pull the mean (expected profit) to the positive side, but the median (less sensitive to outliers) is negative, showing that the bulk of the trades are in the negative side. A good strategy would have both statistics in the positive side.
+The average profit is 1.37 pips, the median is -8.25 though. 
 
-All this is confirmed by skewness which is positive indicating a right tailed distribution, which is not good considering median below zero.
+The profit distribution chart shows that the distribution is right tailed.
 
-What if outliers are removed? The hypothesis is that this strategy relies only on outliers and removing them would turn this strategy into a losing one in average, meaning that the average profit should shift to the negative side.
 

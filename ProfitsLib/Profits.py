@@ -350,6 +350,10 @@ class Sortino():
 
 class Profits:
 
+    DESC_MAP = {}
+    
+
+
     def __init__(self, net_pft_col="net_profit_pips", 
                  cum_pft_col = "acc_profit_pips", 
                  gross_profit_col="gross_profit", 
@@ -361,6 +365,32 @@ class Profits:
         self.init_capital = init_capital
 
         self.metrics = dict()
+        self.build_description_map()
+
+        
+
+    def build_description_map(self):    
+        self.DESC_MAP[self.net_pft_col] = "Net Profit"
+        self.DESC_MAP[self.gross_pft_col] = "Gross Profit"
+
+
+        self.DESC_MAP["total_trades"] = "Total trades"
+        self.DESC_MAP["winning_trades"] = "Winning trades"
+        self.DESC_MAP["losing_trades"] = "Losing tradest"
+        self.DESC_MAP["avg_winning"] = "Average winning profit"
+        self.DESC_MAP["avg_losing"] = "Average losing profit"
+        self.DESC_MAP["avg_profit"] = "Average profit"
+
+        self.DESC_MAP["total_pl"] = "Total profit&loss"
+        self.DESC_MAP["total_profit"] = "Total profit"
+        self.DESC_MAP["total_loss"] = "Total loss"
+        self.DESC_MAP["stdev_pl"] = "Profit & loss std. deviation"
+        self.DESC_MAP["median_profit"] = "Median profit&loss"        
+        self.DESC_MAP["skrew_pl"] = "Skew profit & loss"        
+
+    def metris_description(self):
+        _metrics_dict = {self.DESC_MAP[k]:self.metrics[k] for k in self.DESC_MAP.keys()}
+        return _metrics_dict
 
     def calc_net_profit(self, df, cost):
         """
@@ -403,6 +433,8 @@ class Profits:
         self.metrics["total_trades"] = len(df)
         self.metrics["winning_trades"] = len(df[_mask_win])
         self.metrics["losing_trades"] = len(df[~_mask_win])
+        self.metrics["avg_winning"] = df[_mask_win]["net_profit"].mean()
+        self.metrics["avg_losing"] = df[~_mask_win]["net_profit"].mean()
         self.metrics["total_pl"] = df[self.net_pft_col].sum()
         self.metrics["total_profit"] = df[_mask_win][self.net_pft_col].sum()
         self.metrics["total_loss"] = df[~_mask_win][self.net_pft_col].sum()
@@ -410,6 +442,7 @@ class Profits:
         self.metrics["stdev_cum_pl"] = df[self.cum_pft_col].std(0)
         self.metrics["avg_profit"] =  df[self.net_pft_col].mean()
         self.metrics["median_profit"] =  df[self.net_pft_col].median()
+        self.metrics["skew_pl"] = df["net_profit"].skew()
 
 
     def compute(self, df, cost):
