@@ -349,10 +349,7 @@ class Sortino():
 
 
 class Profits:
-
-    DESC_MAP = {}
     
-
 
     def __init__(self, net_pft_col="net_profit_pips", 
                  cum_pft_col = "acc_profit_pips", 
@@ -365,29 +362,8 @@ class Profits:
         self.init_capital = init_capital
 
         self.metrics = dict()
-        self.build_description_map()
 
         
-
-    def build_description_map(self):    
-        self.DESC_MAP[self.net_pft_col] = "Net Profit"
-        self.DESC_MAP[self.gross_pft_col] = "Gross Profit"
-
-
-        self.DESC_MAP["total_trades"] = "Total trades"
-        self.DESC_MAP["winning_trades"] = "Winning trades"
-        self.DESC_MAP["losing_trades"] = "Losing tradest"
-        self.DESC_MAP["avg_winning"] = "Average winning profit"
-        self.DESC_MAP["avg_losing"] = "Average losing profit"
-        self.DESC_MAP["avg_profit"] = "Average profit"
-
-        self.DESC_MAP["total_pl"] = "Total profit&loss"
-        self.DESC_MAP["total_profit"] = "Total profit"
-        self.DESC_MAP["total_loss"] = "Total loss"
-        self.DESC_MAP["stdev_pl"] = "Profit & loss std. deviation"
-        self.DESC_MAP["median_profit"] = "Median profit&loss"        
-        self.DESC_MAP["skrew_pl"] = "Skew profit & loss"        
-
     def metris_description(self):
         _metrics_dict = {self.DESC_MAP[k]:self.metrics[k] for k in self.DESC_MAP.keys()}
         return _metrics_dict

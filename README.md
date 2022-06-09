@@ -300,22 +300,53 @@ The following image presents the gross and net profit for the strategy under ana
 total_trades 	  | 624
 winning_trades 	  | 184
 losing_trades 	  | 440
-total_pl 	      | 857.3
+avg_winning 	  | 46.12
+avg_losing 	  | -17.34
+total_pl 	  | 857.3
 total_profit 	  | 8486.3
-total_loss 	      | -7629.0
-stdev_pl 	      | 43.93
+total_loss 	  | -7629.0
+stdev_pl 	  | 43.93
 stdev_cum_pl 	  | 372.23
-avg_profit 	      | 1.37
+avg_profit 	  | 1.37
 median_profit 	  | -8.25
+skew_pl 	  | 3.36
+
 
 <img src="raw_profit_dist.png">
 
 **Observations**
 
-Winning trades proportion: 184 out of 624 trades are winning ones. A 29.5%, or roughly a third.
+1. The strategy is profitable, after cost removal: 857.3 pips.
 
-The average profit is 1.37 pips, the median is -8.25 though. 
+2. Winning trades proportion: 184 out of 624 trades are winning ones. A 29.5%, or roughly a third.
 
-The profit distribution chart shows that the distribution is right tailed.
+2. The average profit is 1.37 pips, the median is -8.25 though. 
+
+3. The profit distribution chart shows that the distribution is right tailed, which is confirmed by a positive skewness. Also, it is possible to observe that the profits are concentrated around zero.
+
+4. The average profit of winning trades is 46.12 pips, while the losing trade average profit is -17.34
 
 
+### Results Analysis
+
+Considering that proportion of winning trades (observation 2) is low and that e the strategy is profitable (observation 1) it is possible to hypothesize that the winning trades average should be high and losing ones low, which is confirmed by observation 4.
+
+There are two possible explanations for high winning trades average: a) Concentration around the average, which is signal that the strategy is consistent and b) The presence of outliers, which signals the opposite than a). Clearly a) is not the case because winning trades average profit is not concentrated around 46.12 and it is evident the presence of positive outliers (observation 3).
+
+It is almost evident that the strategy is heavily dependent on outliers, so next step is comparing the strategy performance with and without outliers through an statistical tool: Confidence Intervals.
+
+## Outliers Removal
+
+### Previous Considerations
+
+Before removing outliers two aspects, related to data and the confidence intervals tool, need to be taken into consideration.
+
+a)	**Profit Distribution**. Profit distribution is not normal, and confidence intervals relies on normality which invalidates raw profit for the analysis. To overcome this issue, it is at hand the Central Limit Theorem. It is necessary then to define a statistic and do sampling to calculate it. For this analysis the statistic of choice is profit mean, so the sampling process will produce mean sampling, which is assumed as normal distributed. This means that instead of analyzing raw profit, the analysis now shifts to profit mean.
+
+b)	**Sampling on time series**. With cross sectional data (not time related) it is possible to perform sampling techniques like bootstrapping for example, but profits variable is a time series, and there could be correlations (auto-correlation) between consecutive values.  For example, opening time for trade $t+1$ was affected because trade $t$ was open at the time it should have been opened. Even tough autocorrelation detection is out of the scope of this analysis and for simplicity auto-correlation will be assumed. You can go deeper in some auto-correlation detection techniques like Auto Correlation Function (ACF) and Partial Auto Correlation Function (PACF).
+
+For time series bootstrapping there are some techniques, like block bootstrapping, with and without overlapping, among others. To maximize the number of samples, simple block bootstrapping with overlapping is used in this analysis. The following image describe in essence what this technique consists of.
+
+ <img src = "BootStrapTS.png" width="700">
+
+ 
