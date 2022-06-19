@@ -450,7 +450,8 @@ Once trades are removed the sampling process is run again abd the same confidenc
  * sampling std: 2.17, 
  * sampling min: -10.47,
  * sampling max: -0.33
-confidence interval: [-5.74, -5.34], mean: -5.54, standard error: 0.1
+ 
+ * confidence interval: [-5.74, -5.34], mean: -5.54, standard error: 0.1
 
 <img src="raw_profit_dist_without_outliers_using_math.png">
 
