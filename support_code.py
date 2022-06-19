@@ -38,7 +38,14 @@ class ConfidenceInterval:
             
 class PlotDistribution:
 
-    def plot(self, sample_data: pd.Series, sample_min: float, sample_max: float,  sample_mean: float, sample_median: float, sample_std_dev: float):
+    def plot(self, sample_data: pd.Series, 
+             sample_min: float, 
+             sample_max: float,  
+             sample_mean: float, 
+             sample_median: float, 
+             sample_std_dev: float,
+             savefig: bool = False,
+             fig_name: str = ""):
 
         
         # plot distwith normal, std_error: float curce as reference
@@ -53,6 +60,8 @@ class PlotDistribution:
         plt.plot(x,D, color="r", label="Normal distrib.")
         plt.legend(fontsize=8)
         plt.title('Profit distribution', size=15)
+        if savefig:
+            plt.savefig(fig_name)
         plt.show()
 
 

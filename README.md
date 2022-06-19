@@ -341,12 +341,138 @@ It is almost evident that the strategy is heavily dependent on outliers, so next
 
 Before removing outliers two aspects, related to data and the confidence intervals tool, need to be taken into consideration.
 
-a)	**Profit Distribution**. Profit distribution is not normal, and confidence intervals relies on normality which invalidates raw profit for the analysis. To overcome this issue, it is at hand the Central Limit Theorem. It is necessary then to define a statistic and do sampling to calculate it. For this analysis the statistic of choice is profit mean, so the sampling process will produce mean sampling, which is assumed as normal distributed. This means that instead of analyzing raw profit, the analysis now shifts to profit mean.
+a)	**Profit Distribution**. Profit distribution is not normal, and confidence intervals relies on normality which invalidates raw profit for the analysis. To overcome this issue, it is at hand the Central Limit Theorem. It is necessary then to define a statistic and do sampling to calculate it. For this analysis the statistic of choice is profit mean, so the sampling process will produce profit mean sampling, which is assumed as normal distributed. This means that instead of analyzing raw profit, the analysis now shifts to profit mean.
 
-b)	**Sampling on time series**. With cross sectional data (not time related) it is possible to perform sampling techniques like bootstrapping for example, but profits variable is a time series, and there could be correlations (auto-correlation) between consecutive values.  For example, opening time for trade $t+1$ was affected because trade $t$ was open at the time it should have been opened. Even tough autocorrelation detection is out of the scope of this analysis and for simplicity auto-correlation will be assumed. You can go deeper in some auto-correlation detection techniques like Auto Correlation Function (ACF) and Partial Auto Correlation Function (PACF).
+b)	**Sampling on time series**. With cross sectional data (not time related) it is possible to perform sampling techniques like bootstrapping for example, but profits variable is a time series, and there could be correlations (auto-correlation) between consecutive values.  For example, opening time for trade $t+1$ was affected because trade $t$ was open at the time it should have been opened. Even tough autocorrelation detection is out of the scope of this analysis and for simplicity auto-correlation will be assumed. You can go deeper in some auto-correlation detection techniques like Auto Correlation Function (ACF) and Partial Auto Correlation Function (PACF)
 
 For time series bootstrapping there are some techniques, like block bootstrapping, with and without overlapping, among others. To maximize the number of samples, simple block bootstrapping with overlapping is used in this analysis. The following image describe in essence what this technique consists of.
 
  <img src = "BootStrapTS.png" width="700">
 
- 
+ Now it is possible to calculate the confidence interval for profit mean. 
+
+### Confidence Interval Parameters
+
+ To calculate confidence interval the following parameter sare used:
+
+* Confidence level: 95 (alpha = 0.05)<br>
+* Sample size: 60
+
+
+### Confidence Interval with outliers
+
+
+* sampling mean: 1.17
+* sampling median: 0.25
+* sampling std: 6.42 
+* sampling min: -13.02
+* sampling max: 16.64
+
+* confidence interval: [0.64, 1.7], mean: 1.17, standard error: 0.27
+
+
+<img src="raw_profit_dist_with_outliers.png">
+
+**Observations**
+
+With a 95% of probability, the profit mean is within the range 0.64 and 1.7 pips. For the purpose of this analysis, this is a benchmark only.
+
+
+### Removing Outliers
+
+There are many approaches to remove outliers like trimmed mean, values out of a certain number of standard deviation range, out of interquartile ranges, to name a few. For this analysis, two approaches are being taken into consideration: The trading approach and a mathematical approach.
+
+The trading approach to remove outliers uses trading's risk management tools: Stop Loss and Take Profit. In general terms, Stop Loss controls the loss risk (under a normal market context of volatility not like this context:https://www.dailyfx.com/forex/market_alert/2015/01/15/Swiss-Franc-Skyrockets-as-SNB-Announce-End-of-Currency-Floor.html) and Take Profit, limit the profits. The advantage of this approach is that no data need to be removed from the sample and makes sense from the trading perspective because stop loss and take profit are simple to apply (implemented in most trading platforms) and will work as expected most of the time.
+
+In the other hand, using mathematical approach to remove outliers like trimming the data (removing data above 90 and below 10 percentiles) for example, is actually difficult to implement because it requires forecasting tools that can predict ahead in time when an outlier will occur, which is complex.
+
+Being that said, the most feasible approach is the trading one, both will be applied though for research purposes.
+
+
+#### Trading Approach
+
+This approach considers applying risk management tools to reduce outliers:  Stop Loss (SL) and Take Profit (TP)
+
+SL levels and TP levels are set using standard deviation of net profits. SL will be set at one standard deviation and TP will be set at two standard deviations (there are as many criteria to define take profit and stop loss levels as traders exists)
+
+
+This way, the profit range is:
+
+$PR = [-s, 2s]$
+
+Where:
+
+$s$: profit standard deviation
+
+
+**Before Removing Outliers:**
+
+Min profit  -114.1 max profit  406.8
+
+
+**After Removing Outliers:**
+
+Min profit  -43.93 max profit  87.85
+
+
+<img src="profit_limited_by_sl_tp.png">
+
+
+* sampling mean: -0.45, 
+* sampling median: -0.98
+* sampling std: 4.77, 
+* sampling min: -11.8,
+* sampling max: 11.94
+* confidence interval: [-0.84, -0.06], mean: -0.45, standard error: 0.2
+
+
+<img src="raw_profit_dist_without_outliers_using_sl_tp.png">
+
+
+**Observations**
+
+Removing outliers using stop loss and take profit, moved the profit sampling mean towards the left to a negative confident interval, which supports the hypothesis that the strategy relayed only in outliers.
+
+
+### Mathematical Approach
+
+As mentioned before, this approach is considered only for research purposes, but is not applicable in practical trading, unless you can apply a very accurate outlier prediction model.
+
+The criteria that are applied here is to remove all trades for which their profits are either below the 10th percentile and above the 90th percentile.
+
+Once trades are removed the sampling process is run again abd the same confidence interval is used: alpha = 0.05 (confidence level of 95%)
+
+<img src="10_90_percentile_profit.png">
+
+
+ * sampling mean: -5.54, 
+ * sampling median: -5.32
+ * sampling std: 2.17, 
+ * sampling min: -10.47,
+ * sampling max: -0.33
+confidence interval: [-5.74, -5.34], mean: -5.54, standard error: 0.1
+
+<img src="raw_profit_dist_without_outliers_using_math.png">
+
+
+**Observarions**
+
+Removing outlier trades clearly moves the sampling profit mean towards the negetive side, confirming what was found with the trading approach.
+
+
+
+## Conclusions
+
+
+Using relatively basic statistics tools, like central limit theorem, confidence intervals and bootstrap sampling for time series (or autocorrelated data) it has been shown that a profitable strategy was not consistently profitable and relayed only on outliers.
+
+Consistent strategies are those where profits are produced by a high proportion of positive trades, presenting positive median and equal or very approximated profit mean. 
+
+What is the difference with profit produced by outliers? Outliers are rare situations and there is not certainty they will occur. Instead, consistent strategies capture more frequent events producing positive profits, probably smaller profits (or losses) produced by outliers.
+
+It is possible to also appreciate the importance of performing this basic analysis before calculating more specialized metrics to measure the potential of a trading strategy like maximum drawdown, Sharpe ratio to name a few. If profit median is negative and profit mean is not, something is not right and possibly outliers are the culprit.
+
+Besides the analysis conclusions, throughout this work is presented an oversimplified process for algorithmic trading strategy back testing; trading idea, model design, vectorized back-testing implementation, back testing running, metrics collecting, analysis, and conclusions and even you can see that the process is not linear, because when a difference between mean and median was spotted, the process had to add additional information to support hypothesis testing.
+
+And last and not least there is a technology dimension not visible in this analysis because the volume of data was relatively low, but if that wouldn’t have been the case, a more robust platform than a notebook and a Jupyter notebook should have been evaluated and used.
+
