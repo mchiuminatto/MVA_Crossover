@@ -1,4 +1,4 @@
-# Outliers are Liars
+# Impact of Outliers in Algorithmic Trading Strategies
 
 Author: Marcello Chiuminatto <br>
 Python version: 3.10.4
